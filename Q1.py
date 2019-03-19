@@ -14,23 +14,25 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
 
 
     cost_matrix = [[initial_val for i in range(len_seq_1)] for j in range(len_seq_2)]
-    direction_matrix = [[list(initial_direction) for i in range(len_seq_1)] for j in range(len_seq_2)]
+    direction_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
 
     gap_score = scoring[0][0]
+
 
     print("\n Initialising the first rows")
     for i in range(len_seq_1):
         cost_matrix[0][i] = i * gap_score
-        direction_matrix[0][i][0] = 1
+        direction_matrix[0][i] = 1
 
     for i in range(len_seq_2):
         cost_matrix[i][0] = i * gap_score
-        direction_matrix[i][0][2]=1
-
-    #print_nice(cost_matrix)
+        direction_matrix[i][0]=4
 
 
     print("\n Calculating costs")
+    
+    print("\nCost matrix")
+    print_nice(cost_matrix)
 
     for i in range(1,len_seq_2):
         for j in range(1,len_seq_1):
@@ -39,57 +41,65 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
             
             t_1 = scoring_translation[seq1[j-1]]
             t_2 = scoring_translation[seq2[i-1]]
-            D = cost_matrix[i-1][j-1] + scoring_matrix[t_1][t_2]
-
+            D = cost_matrix[i-1][j-1] + scoring[t_1][t_2]
 
             cost_matrix[i][j] = max(L, U, D)
             
             if cost_matrix[i][j] == L:
-                direction_matrix[i][j][0] = 1
+                direction_matrix[i][j] += 1
 
             if cost_matrix[i][j] == D:
-                direction_matrix[i][j][1] = 1
+                direction_matrix[i][j] += 2
 
             if cost_matrix[i][j] == U:
-                direction_matrix[i][j][2] = 1 
-  
-    #print("Cost matrix")
-    #print_nice(cost_matrix)
+                direction_matrix[i][j] += 4
 
-    #print("Direction matrix")
-    #print_nice(direction_matrix)
+         
+  
+    print("\nCost matrix")
+    print_nice(cost_matrix)
+
+    print("\nDirection matrix")
+    print_nice(direction_matrix)
     return (cost_matrix[len_seq_2-1][len_seq_1-1], direction_matrix)
 
-'''def back_track(direction_matrix, i, j, prev_1, prev_2):
-    #print("in  (i,j) = (%d, %d)"%(i,j))
-    if i == 0 and j == 0:
-        print()
-        print("seq 1: %s"%prev_1[::-1])
-        print("seq 2: %s"%prev_2[::-1])
-        return
-    
-    if direction_matrix[j][i][0] == 1:
-        #print("Contains an L reccing into (i,j) = (%d, %d)"%(i-1,j))
-        prev_new_1 = prev_1 + seq_1[i-1] 
-        prev_new_2 = prev_2 + "-"
-        back_track(direction_matrix, i-1, j, prev_new_1, prev_new_2)
-    
-    if direction_matrix[j][i][1] == 1:
-        #print("Contains an D reccing into (i,j) = (%d, %d)"%(i-1,j-1))
-        prev_new_1 = prev_1 + seq_1[i-1]
-        prev_new_2 = prev_2 + seq_2[j-1]
-        back_track(direction_matrix, i-1, j-1, prev_new_1, prev_new_2)
+def back_track(direction_matrix, seq_1, seq_2):
+    j = len(direction_matrix)-1
+    i = len(direction_matrix[0])-1
 
-    if direction_matrix[j][i][2] == 1:
-        #print("Contains an U reccing into (i,j) = (%d, %d)"%(i,j-1))
-        prev_new_1 = prev_1 + "-"
-        prev_new_2 = prev_2 + seq_2[j-1]
-        back_track(direction_matrix, i, j-1, prev_new_1, prev_new_2)
-'''
+
+
+    alignment = ["",""]
+   
+    while i > 0 or j > 0:
+        if (direction_matrix[j][i]&1) != 0:
+            print("L")
+            #L
+            alignment[0]+=seq_1[i-1] 
+            alignment[1]+="-"
+            i -= 1
+            
+        elif (direction_matrix[j][i]&2) != 0:
+            #D
+            print("D")
+            alignment[0]+=seq_1[i-1]
+            alignment[1]+=seq_2[j-1]
+            i -= 1
+            j -= 1
+
+        elif (direction_matrix[j][i]&4) != 0:
+            #U
+            print("U")
+            alignment[0]+="-"
+            alignment[1]+=seq_2[j-1]
+            j = j-1
+
+
+    return alignment
+
 def print_nice(A):
     print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
       for row in A]))
-
 
 # ------------------------------------------------------------
 
@@ -107,6 +117,7 @@ def displayAlignment(alignment):
             string3=string3+"|"
         else:
             string3=string3+" "
+    
     print('Alignment ')
     print('String1: '+string1)
     print('         '+string3)
@@ -117,12 +128,12 @@ def displayAlignment(alignment):
 
 # DO NOT EDIT ------------------------------------------------
 # This opens the files, loads the sequences and starts the timer
-file1 = open(sys.argv[1], 'r')
+'''file1 = open(sys.argv[1], 'r')
 seq1=file1.read()
 file1.close()
 file2 = open(sys.argv[2], 'r')
 seq2=file2.read()
-file2.close()
+file2.close()'''
 start = time.time()
 
 #-------------------------------------------------------------
@@ -133,15 +144,14 @@ start = time.time()
 #   G -2 -3 -3  2 -3
 #   T -2 -3 -3 -3  1
 
-#seq1 = 'TGGTCTCT'
-#seq2 = 'TCTGGGCTC'
+seq1 = 'TGGTCCGCT'
+seq2 = 'TCTGGGC'
 
 practical_scoring_matrix = [[-2, -2, -2, -2, -2],
                             [-2,  1, -1, -1, -1],
                             [-2, -1,  1, -1, -1],
                             [-2, -1, -1,  1, -1],
                             [-2, -1, -1, -1,  1]]
-
 
 scoring_matrix = [[-2, -2, -2, -2, -2],
                  [-2,  4, -3, -3, -3],
@@ -151,11 +161,13 @@ scoring_matrix = [[-2, -2, -2, -2, -2],
 
 scoring_translation = {"A":1, "C":2, "G":3, "T":4}
 
-temp = generateBacktrack(seq1, seq2, scoring_matrix, scoring_translation)
+temp = generateBacktrack(seq1, seq2, practical_scoring_matrix, scoring_translation)
 best_score = temp[0]
 back_track_matrix = temp[1]
 
-
+best_alignment = back_track(back_track_matrix, seq1, seq2)
+print(best_alignment)
+#print(c("A", "A", practical_scoring_matrix, scoring_translation))
 
 #-------------------------------------------------------------
 
@@ -168,7 +180,7 @@ time_taken=stop-start
 # Print out the best
 print('Time taken: '+str(time_taken))
 print('Best (score '+str(best_score)+'):')
-#displayAlignment(best_alignment)
+displayAlignment(best_alignment)
 
 #-------------------------------------------------------------
 
