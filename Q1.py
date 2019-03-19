@@ -14,8 +14,10 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
     initial_direction = [0,0,0] # [L,D,U]
  
 
-    cost_matrix = [[initial_val for i in range(len_seq_1)] for j in range(len_seq_2)]
-    direction_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
+    #cost_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
+    #direction_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
+    cost_matrix = [x[:] for x in [[0] * len_seq_1] * len_seq_2]
+    direction_matrix = [x[:] for x in [[0] * len_seq_1] * len_seq_2]
 
     gap_score = scoring[0][0]
 
@@ -53,10 +55,10 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
             if cost_matrix[i][j] == L:
                 direction_matrix[i][j] += 1
 
-            if cost_matrix[i][j] == D:
+            elif cost_matrix[i][j] == D:
                 direction_matrix[i][j] += 2
 
-            if cost_matrix[i][j] == U:
+            elif cost_matrix[i][j] == U:
                 direction_matrix[i][j] += 4
 
          
