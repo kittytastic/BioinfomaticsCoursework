@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import time
 import sys
-
+#import dis
 
 # YOUR FUNCTIONS GO HERE -------------------------------------
 # 1. Populate the scoring matrix and the backtracking matrix
@@ -66,15 +66,15 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
     #print("\nCost matrix")
     #print_nice(cost_matrix)
 
-    #print("\nDirection matrix")
+    #print("\nDirection matrix")python
+
     #print_nice(direction_matrix)
     return (cost_matrix[len_seq_2-1][len_seq_1-1], direction_matrix)
+    #return cost_matrix[len_seq_2-1][len_seq_1-1]
 
 def back_track(direction_matrix, seq_1, seq_2):
     j = len(direction_matrix)-1
     i = len(direction_matrix[0])-1
-
-
 
     alignment = ["",""]
    
@@ -183,12 +183,16 @@ scoring_matrix = ((-2, -2, -2, -2, -2),
 
 scoring_translation = {"A":1, "C":2, "G":3, "T":4}
 
+print("Doing dynamic programming")
 temp = generateBacktrack(seq1, seq2, scoring_matrix, scoring_translation)
 best_score = temp[0]
 back_track_matrix = temp[1]
 
+print("Starting backtrack")
 best_alignment = back_track(back_track_matrix, seq1, seq2)
 #print(string_to_turple(seq1))
+
+#dis.dis(generateBacktrack)
 
 #-------------------------------------------------------------
 
