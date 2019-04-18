@@ -1,4 +1,4 @@
-#import dis
+import dis
 import time
 
 def time_f(func):
@@ -72,7 +72,7 @@ def inline_vs_function_b():
         b = 2
         for i in range(100000000):
                 j = a+b 
-
+# ################# Max Element ###############
 def index_max_el_a():
         l = list(range(1, 5))
         max_e = 0
@@ -83,10 +83,42 @@ def index_max_el_a():
                                 max_e = l[i]
                                 index = i
 
+
 def index_max_el_b():
         l = list(range(1, 5))
         for i in range(1000000):
                 max_e = max(l[3:])
                 index = l.index(max_e)
 
-time_and_dis(index_max_el_a, index_max_el_b)
+ ############## Setting arrays ###############
+def seting_array_a():
+    par = 10000000
+    var=[0] * (par+1)
+    for i in range(par):
+        var[i+1]=i
+
+
+def seting_array_b():
+    par = 10000000
+    var=[0] 
+    for i in range(par):
+        var.append(i)
+
+# ############# Setting arrays ###############
+def seting_array_str_a():
+    par = 100000000
+    s = " " * par
+    var=[0] * (par+1)
+    for i in range(par):
+        var[i+1]=s[i]
+
+
+def seting_array_str_b():
+    par = 100000000
+    s = " " * par
+    s = " "+s
+    var=[0] * (par+1)
+    for i in range(1, par+1):
+        var[i]=s[i]
+
+time_and_dis(seting_array_str_b, seting_array_str_a)

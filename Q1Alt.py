@@ -39,17 +39,20 @@ def generateBacktrack(seq1, seq2, scoring):
    # Itterator for inside loop saved
     seq1_itt = range(1,len_seq_1)
 
+    # Preloaded so it can be moved to prev row
+    cur_row = cost_matrix[0]
+
     for i in range(1,len_seq_2):
-        # Rather than reload score the the left I just use the previous iterations score, initialise this  
-        best_s = gap_score
-        
-        
+          
         # To avoid python subscript op[] the list are preloaded 
-        i_prev = i-1
-        prev_row = cost_matrix[i_prev]
+        prev_row = cur_row
         cur_row = cost_matrix[i]
-        score_row = scoring[enc_seq_2[i_prev]]
+        score_row = scoring[enc_seq_2[i-1]]
         dm_row = direction_matrix[i]
+
+        # Used to keep track of this best score, consequently it can be used as left cell value in next calc
+        # Provided its initialised first
+        best_s = cur_row[0]
 
         # Use saved iterator rather than recreating every time
         for j in seq1_itt:
@@ -61,6 +64,7 @@ def generateBacktrack(seq1, seq2, scoring):
             L = best_s + gap_score
             D = prev_row[j_prev] + score_row[enc_seq_1[j_prev]]
 
+            #print("[%d][%d] L: %d  D: %d  U: %d"%(i, j, L, D, U))
             # Find biggest and save direction 
             best_s = max(L, U, D)
             cur_row[j] = best_s
@@ -68,12 +72,20 @@ def generateBacktrack(seq1, seq2, scoring):
             # This was designed to store all paths and backtrack through all but I made a few modification to speed it up
             if best_s == L:
                 dm_row[j] += 1
-            elif best_s == U:
-                dm_row[j] += 4
+            
             elif best_s == D:
                 dm_row[j] += 2
+            
+            elif best_s == U:
+                dm_row[j] += 4
 
             
+    #print("\nCost matrix")
+    #print_nice(cost_matrix)
+
+    #print("\nDirection matrix")
+    #print_nice(direction_matrix)
+
 
     return (cost_matrix[len_seq_2-1][len_seq_1-1], direction_matrix)
 
@@ -108,7 +120,7 @@ def back_track(direction_matrix, seq_1, seq_2):
     return alignment
 
 # Converts strings to tuples
-def string_to_tuple(stng):
+'''def string_to_tuple(stng):
     letter_code = [0] * len(stng)
     for i in range(len(stng)):
         if stng[i] == "A":
@@ -121,9 +133,10 @@ def string_to_tuple(stng):
              letter_code[i] = 4
 
     return tuple(letter_code)
+'''
 
 def string_to_list(stng):
-    letter_code = [0] * len(stng)
+    letter_code = [0] * (len(stng)+1)
     for i in range(len(stng)):
         if stng[i] == "A":
              letter_code[i] = 1

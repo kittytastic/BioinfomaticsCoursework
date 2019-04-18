@@ -189,26 +189,27 @@ def del_row_col(r_c, mat):
     for r in mat:
         del r[r_c]
 
+# ------------------- Printing functions -----------------------
 
+# Prints data only - I dont print lables as soon as I would have to introduce arbitrary lables.
 def print_nice(mat):
-    print('\n'.join([''.join(['{:7.6}'.format(item) for item in row]) for row in mat]))
+    print('\n'.join([''.join(['{:10.6}'.format(item) for item in row]) for row in mat]))
     print()
 
+# Prints data and lables
 def print_nice_w_lables(A, labels):
-    out_s = '{:7}'.format('')
-    out_s += ''.join(['{:7}'.format(labels[i]) for i in range(len(A))])
+    out_s = '{:8}'.format('')
+    out_s += ''.join(['{:8}'.format(labels[i]) for i in range(len(A))])
     for i in range(len(A)):
-        out_s += '\n{:7}'.format(labels[i])
+        out_s += '\n{:8}'.format(labels[i])
         for j in range(len(A[i])):
-            out_s += '{:7.6}'.format(A[i][j])
+            out_s += '{:8.6}'.format(A[i][j])
 
     print(out_s)
-    #print('\n{:7}'.format(labels[i]).join([''.join(['{:7.6}'.format(item) for item in A[i]]) 
-     # for i in range(len(A))]))
     print()
 #-------------------------------------------------------------
 
-WPGMA("./Tests/matrix3.txt")
+WPGMA("./Matrices/matrix3.txt")
 
 
 

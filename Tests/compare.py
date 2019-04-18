@@ -1,6 +1,6 @@
-f1 = open("tests.txt", "r")
+f1 = open("tests_ans2.txt", "r")
 
-f2 = open("tests1.txt", "r")
+f2 = open("testsFF.txt", "r")
 
 print("If nothing shows up after this, there were no errors")
 

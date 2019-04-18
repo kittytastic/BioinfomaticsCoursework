@@ -1,69 +1,94 @@
 #!/usr/bin/python
 import time
 import sys
-#import dis
 
 # YOUR FUNCTIONS GO HERE -------------------------------------
-# 1. Populate the scoring matrix and the backtracking matrix
 
-def generateBacktrack(seq1, seq2, scoring, scoring_translation):
-    print("\n Initialising")
+
+def generateBacktrack(seq1, seq2, scoring):
+    
     len_seq_1 = len(seq1) + 1
     len_seq_2 = len(seq2) + 1
-    initial_val = 0
-    initial_direction = [0,0,0] # [L,D,U]
- 
 
-    #cost_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
-    #direction_matrix = [[0 for i in range(len_seq_1)] for j in range(len_seq_2)]
+    # Create cost and direction matrices
     cost_matrix = [x[:] for x in [[0] * len_seq_1] * len_seq_2]
     direction_matrix = [x[:] for x in [[0] * len_seq_1] * len_seq_2]
 
+
+    # String are converted to tuple for faster reads
+    enc_seq_1 = string_to_list(seq1)
+    enc_seq_2 = string_to_list(seq2)
+
+    
+    # Used a lot so copied to var
     gap_score = scoring[0][0]
 
-    enc_seq_1 = string_to_turple(seq1)
-    enc_seq_2 = string_to_turple(seq2)
 
-    print("\n Initialising the first rows")
+    # Set first row and column to gap scores
     for i in range(len_seq_1):
         cost_matrix[0][i] = i * gap_score
         direction_matrix[0][i] = 1
 
     for i in range(len_seq_2):
         cost_matrix[i][0] = i * gap_score
-        direction_matrix[i][0]=4
+        direction_matrix[i][0] = 4
 
 
-    print("\n Calculating costs")
-    
-   # print("\nCost matrix")
-   # print_nice(cost_matrix)
+    # Do the dynamic programming
+   
+   # Itterator for inside loop saved
+    seq1_itt = range(1,len_seq_1)
+
+    # Preloaded so it can be moved to prev row
+    cur_row = cost_matrix[0]
 
     for i in range(1,len_seq_2):
-        for j in range(1,len_seq_1):
-            U = cost_matrix[i-1][j] + gap_score
-            L = cost_matrix[i][j-1] + gap_score
+
+                  
+        # To avoid python subscript op[] the list are preloaded 
+        prev_row = cur_row
+        cur_row = cost_matrix[i]
+        score_row = scoring[enc_seq_2[i]]
+        dm_row = direction_matrix[i]
+
+        # Used to keep track of this best score, consequently it can be used as left cell value in next calc
+        # Provided its initialised first
+        best_s = cur_row[0]
+
+        # Like best score avoids re-reading if it is preloaded and changed  
+        prev_diagonal = prev_row[0]
+
+
+        # Use saved iterator rather than recreating every time
+        for j in seq1_itt:
             
-            #t_1 = scoring_translation[seq1[j-1]]
-            #t_2 = scoring_translation[seq2[i-1]]
-            #D = cost_matrix[i-1][j-1] + scoring[t_1][t_2]
-            D = cost_matrix[i-1][j-1] + scoring[enc_seq_1[j-1]][enc_seq_2[i-1]]
+            # Get square above 
+            cur_above = prev_row[j]
 
-            #print("[%d][%d] L: %d  D: %d  U: %d"%(i, j, L, D, U))
-            #print("      Left: %d  Diag:  %d  Up:  %d"%())
-            cost_matrix[i][j] = max(L, U, D)
+            # Calcute the score  for U, L and D
+            U = cur_above + gap_score
+            L = best_s + gap_score
+            D = prev_diagonal + score_row[enc_seq_1[j]]
+
             
-            if cost_matrix[i][j] == L:
-                direction_matrix[i][j] += 1
+            # Find biggest and save direction 
+            best_s = max(L, U, D)
+            cur_row[j] = best_s
+            
+            # This was designed to store all paths and backtrack through all but I made a few modification to speed it up
+            if best_s == L:
+                dm_row[j] += 1
+            
+            elif best_s == D:
+                dm_row[j] += 2
+            
+            elif best_s == U:
+                dm_row[j] += 4
 
-            elif cost_matrix[i][j] == D:
-                direction_matrix[i][j] += 2
+            # Square above is now diagonal 
+            prev_diagonal = cur_above
 
-            elif cost_matrix[i][j] == U:
-                direction_matrix[i][j] += 4
-
-         
-  
+    # Print debug info 
     #print("\nCost matrix")
     #print_nice(cost_matrix)
 
@@ -71,54 +96,59 @@ def generateBacktrack(seq1, seq2, scoring, scoring_translation):
     #print_nice(direction_matrix)
 
     return (cost_matrix[len_seq_2-1][len_seq_1-1], direction_matrix)
-    #return cost_matrix[len_seq_2-1][len_seq_1-1]
 
+
+
+# Backtrack function
 def back_track(direction_matrix, seq_1, seq_2):
     j = len(direction_matrix)-1
     i = len(direction_matrix[0])-1
 
-    alignment = ["",""]
+    a1 = ""
+    a2 = ""
    
     while i > 0 or j > 0:
-        if (direction_matrix[j][i]&1) != 0:
+        curr_square = direction_matrix[j][i]
+
+        # Directions are stored in bits 
+        if (curr_square&1) != 0:
             #L
-            alignment[0]+=seq_1[i-1] 
-            alignment[1]+="-"
+            a1+=seq_1[i-1] 
+            a2+="-"
             i -= 1
-            
-        elif (direction_matrix[j][i]&2) != 0:
+        elif (curr_square&2) != 0:
             #D
-            alignment[0]+=seq_1[i-1]
-            alignment[1]+=seq_2[j-1]
+            a1+=seq_1[i-1]
+            a2+=seq_2[j-1]
             i -= 1
             j -= 1
-
-        elif (direction_matrix[j][i]&4) != 0:
+        elif (curr_square&4) != 0:
             #U
-            alignment[0]+="-"
-            alignment[1]+=seq_2[j-1]
+            a1+="-"
+            a2+=seq_2[j-1]
             j = j-1
 
 
-    return alignment
+    return [a1[::-1], a2[::-1]]
 
-def string_to_turple(stng):
-    scoring_translation = {"A":1, "C":2, "G":3, "T":4}
 
-    letter_code = [0] * len(stng)
+# Converts a string to a list of numbers incremented 1 over
+def string_to_list(stng):
+    letter_code = [0] * (len(stng)+1)
     for i in range(len(stng)):
-        letter_code[i] = scoring_translation[stng[i]]
-        '''if stng[i] == "A":
-             letter_code[i] = 1
+        if stng[i] == "A":
+             letter_code[i+1] = 1
         elif stng[i] == "C":
-             letter_code[i] = 2
+             letter_code[i+1] = 2
         elif stng[i] == "G":
-             letter_code[i] = 3
+             letter_code[i+1] = 3
         elif stng[i] == "T":
-             letter_code[i] = 4'''
+             letter_code[i+1] = 4
 
-    return tuple(letter_code)
+    return letter_code
 
+
+# Prints matrix
 def print_nice(A):
     print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
       for row in A]))
@@ -160,40 +190,38 @@ file2.close()
 start = time.time()
 
 #-------------------------------------------------------------
+
+
+#seq1 = 'TGGTCCGCT'
+#seq2 = 'TCTGGGC'
+
+'''
+practical_scoring_matrix = [[-2, -2, -2, -2, -2],
+                            [-2,  1, -1, -1, -1],
+                            [-2, -1,  1, -1, -1],
+                            [-2, -1, -1,  1, -1],
+                            [-2, -1, -1, -1,  1]]
+'''
+
+
 #     Gap A  C  G  T
 # Gap -2 -2 -2 -2 -2
 #   A -2  4 -3 -3 -3
 #   C -2 -3  3 -3 -3
 #   G -2 -3 -3  2 -3
 #   T -2 -3 -3 -3  1
-
-#seq1 = 'TGGTCCGCT'
-#seq2 = 'TCTGGGC'
-
-practical_scoring_matrix = [[-2, -2, -2, -2, -2],
-                            [-2,  1, -1, -1, -1],
-                            [-2, -1,  1, -1, -1],
-                            [-2, -1, -1,  1, -1],
-                            [-2, -1, -1, -1,  1]]
-
 scoring_matrix = ((-2, -2, -2, -2, -2),
                  (-2,  4, -3, -3, -3),
                  (-2, -3,  3, -3, -3),
                  (-2, -3, -3,  2, -3), 
                  (-2, -3, -3, -3,  1))
 
-scoring_translation = {"A":1, "C":2, "G":3, "T":4}
 
-print("Doing dynamic programming")
-temp = generateBacktrack(seq1, seq2, scoring_matrix, scoring_translation)
-best_score = temp[0]
-back_track_matrix = temp[1]
+# Do dynamic programming
+best_score, back_track_matrix =  generateBacktrack(seq1, seq2, scoring_matrix)
 
-print("Starting backtrack")
+# Backtrack
 best_alignment = back_track(back_track_matrix, seq1, seq2)
-#print(string_to_turple(seq1))
-
-#dis.dis(generateBacktrack)
 
 #-------------------------------------------------------------
 
