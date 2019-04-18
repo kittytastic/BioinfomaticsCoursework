@@ -16,8 +16,8 @@ def generateBacktrack(seq1, seq2, scoring):
 
 
     # String are converted to tuple for faster reads
-    enc_seq_1 = string_to_tuple(seq1)
-    enc_seq_2 = string_to_tuple(seq2)
+    enc_seq_1 = string_to_list(seq1)
+    enc_seq_2 = string_to_list(seq2)
 
     
     # Used a lot so copied to var
@@ -121,6 +121,20 @@ def string_to_tuple(stng):
              letter_code[i] = 4
 
     return tuple(letter_code)
+
+def string_to_list(stng):
+    letter_code = [0] * len(stng)
+    for i in range(len(stng)):
+        if stng[i] == "A":
+             letter_code[i] = 1
+        elif stng[i] == "C":
+             letter_code[i] = 2
+        elif stng[i] == "G":
+             letter_code[i] = 3
+        elif stng[i] == "T":
+             letter_code[i] = 4
+
+    return letter_code
 
 
 def print_nice(A):

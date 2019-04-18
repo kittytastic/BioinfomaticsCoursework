@@ -208,7 +208,7 @@ def print_nice_w_lables(A, labels):
     print()
 #-------------------------------------------------------------
 
-WPGMA("./matrix2.txt")
+WPGMA("./Tests/matrix3.txt")
 
 
 
